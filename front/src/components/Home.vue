@@ -25,20 +25,15 @@ export default {
       const reader = new FileReader();
       const vm = this;
 
-      reader.onload = () => {
-        vm.table = reader.result;
-      };
+      reader.onload = () => { vm.table = reader.result; };
       reader.readAsText(file);
     },
     submitStaff() {
-      const data = {
-        table: this.table,
-        factors: this.factors,
-      };
-
-      axios.post('http://localhost:5000/reduction', data)
+      axios.post('http://localhost:5000/reduction', { table: this.table, factors: this.factors })
       .then((response) => {
+        // Write response body to main state
         console.log(response);
+        // this.$router.push('Results');
       })
       .catch((error) => {
         console.log(error);

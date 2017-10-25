@@ -16,18 +16,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 def upload_data():
     table = request.get_json()['table']
     factors = int(request.get_json()['factors'])
-    core.reduct(table, factors)
-
-    performed = []
-    for row in table.split('\n'):
-        n_row = []
-        for el in row.split(','):
-            if (len(el) > 0):
-                n_row.append(float(el))
-        performed.append(n_row)
-    performed.pop()
-    print(performed)
-    return jsonify(request.json)
+    return jsonify(core.reduct(table, factors))
 
 # Get Method
 @app.route('/todo/api/v1.0/tasks', methods=['GET'])
