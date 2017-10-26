@@ -3,50 +3,39 @@
     <b-container v-if="isShow">
       <h2 class="page-title">Data Before</h2>
       <b-row>
-        <b-col cols="9" class="chart">
-          <div class="card">
-            <h3 class="card-title">Raw Data Chart</h3>
-            <vue-chart :chart-type="'ScatterChart'" :columns="pureColumns" :rows="rawData" :options="options"></vue-chart>
-          </div>
-        </b-col>
         <b-col>
-          <div class="card">
-            <table>
-              <tr>
-                <td><strong>Clusters Count:</strong></td>
-                <td>{{totalClusters}}</td>
-              </tr>
-              <tr>
-                <td><strong>Elements Count:</strong></td>
-                <td>{{totalElements}}</td>
-              </tr>
-              <tr>
-                <td><strong>Elements in clusters:</strong></td>
-                <td>
-                </td>
-              </tr>
-              <ol>
-                <li v-for="(count, index) in pureData.clusters_sizes" :key="index">{{count}}</li>
-              </ol>
-            </table>
-          </div>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col>
-          <div class="card">
-            <h3 class="card-title">Clustered Data Chart</h3>
-            <vue-chart :chart-type="'ScatterChart'" :columns="coloredColumns" :rows="coloredData" :options="options"></vue-chart>
-          </div>
-          <div class="card">
-            <h3 class="card-title">Andrews Raw Data Chart</h3>
-          </div>
-          <div class="card">
-            <h3 class="card-title">Andrews Colored Data Chart</h3>
-          </div>
-          <div class="card">
-            <h3 class="card-title">Data Table</h3>
-            <b-table hover small :items='tableData' :fields='tableFields'></b-table>
+          <b-row>
+            <b-col cols="8">
+              <div class="card pure-statistics">
+                <h3 class="card-title">General Statistics</h3>
+                <b-row>
+                  <b-col><strong>Clusters Count:</strong> {{totalClusters}}</b-col>
+                  <b-col><strong>Elements Count:</strong> {{totalElements}}</b-col>
+                </b-row>
+                <b-row>
+                  <b-col cols="4"><strong>Elements Count:</strong></b-col>
+                  <b-col v-for="(count, index) in pureData.clusters_sizes" :key="index"><span :style="{ color: pointsColors[index] }">{{pointsColors[index]}}</span> - {{count}}</b-col>
+                </b-row>
+              </div>
+            </b-col>
+            <b-col>
+              <div class="card">
+                <h3 class="card-title">Scroll To:</h3>
+                <ul>
+                  <li><a href="#data-chart">Raw Data Chart</a></li>
+                  <li><a href="#clusterd-chart">Clustered Data Chart</a></li>
+                  <li><a href="#andrews-chart">Andrews Colored Data Chart</a></li>
+                  <li><a href="#data-table">Data Table</a></li>
+                </ul>
+              </div>
+            </b-col>
+          </b-row>
+          <chart-card id="data-chart" title="Raw Data Chart" :chartRows="rawData" :chartCols="pureColumns" xTitle="some" yTitle="stuff"></chart-card>
+          <chart-card id="clusterd-chart" title="Clustered Data Chart" :chartRows="coloredData" :chartCols="coloredColumns" xTitle="some" yTitle="stuff"></chart-card>
+          <chart-card id="andrews-chart" title="Andrews Colored Data Chart" :chartRows="pureData.data" :andrews='true' xTitle="Pi" yTitle="Data"></chart-card>
+          <div id="data-table" class="card">
+            <h3 class="card-title" @click="showTable = !showTable">Data Table</h3>
+            <b-table v-show="showTable" hover small :items='tableData' :fields='tableFields'></b-table>
           </div>
         </b-col>
       </b-row>
@@ -55,11 +44,13 @@
 </template>
 
 <script>
+import ChartCard from './ChartCard';
+
 export default {
   data() {
     return {
       pureData: {},
-      isShow: false,
+      showTable: true,
       tableFields: ['col1', 'col2', 'col3', 'col4'],
       pointsColors: ['red', 'green', 'blue', 'black', 'yellow', 'purple'],
       pureColumns: [{
@@ -85,6 +76,7 @@ export default {
       },
     };
   },
+  components: { ChartCard },
   computed: {
     totalElements() {
       let sum = 0;
@@ -115,9 +107,12 @@ export default {
         el.forEach((e, i) => {
           elementObject[`col${i}`] = e;
         });
-        elementObject._rowVariant = `color-${el[0] + 1}`; // eslint-disable-line
+        elementObject._rowVariant = `color-${el[0] + 1}`; // eslint-disable-line 
         return elementObject;
       });
+    },
+    classColor(index) {
+      return `span-color-${this.pointsColors[index]}`;
     },
   },
   created() {
@@ -130,17 +125,22 @@ export default {
 </script>
   
 <style>
-  .container {
-    margin-top: 20px;
-    font-family: 'Quicksand', sans-serif;
-  }
   .page-title {
     margin: 25px;
     text-align: center;
   }
   .card-title {
+    color: gray;
     text-align: center;
     margin-top: 15px;
+  }
+  .card-title:hover {
+    color: black;
+  }
+  .pure-statistics {
+    text-align: center;
+    font-size: 25px;
+    padding-bottom: 20px !important;
   }
   tr.table-color-1 { background-color: hsla(0, 100%, 50%, 0.2) }
   tr.table-color-2 { background-color: rgba(0, 128, 0, 0.2)}
@@ -148,6 +148,13 @@ export default {
   tr.table-color-4 { background-color: rgba(0, 0, 0, 0.2) }
   tr.table-color-5 { background-color: rgba(255, 255, 0, 0.2) }
   tr.table-color-6 { background-color: rgba(128, 0, 128, 0.2)}
+
+  .span-color-color-1 { color: hsla(0, 100%, 50%, 0.2) }
+  .span-color-color-2 { color: rgba(0, 128, 0, 0.2)}
+  .span-color-color-3 { color: rgba(0, 0, 255, 0.2) }
+  .span-color-color-4 { color: rgba(0, 0, 0, 0.2) }
+  .span-color-color-5 { color: rgba(255, 255, 0, 0.2) }
+  .span-color-color-6 { color: rgba(128, 0, 128, 0.2)}
   .card {
     background: #fff;
     border-radius: 3px;

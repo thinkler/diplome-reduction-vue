@@ -1,11 +1,28 @@
 <template>
   <div>
-    <h2>Upload file, select factors</h2>
-    <form enctype="multipart/form-data" @submit.prevent="submitStaff">
-      <input type="number" v-model="factors">
-      <input type="file" @change='onFileChange' class="input-file">
-      <input type="submit" value="Submit">
-    </form>
+    <h2 class="page-title">Upload file, select factors</h2>
+    <b-form enctype="multipart/form-data" @submit.prevent="submitStaff">
+      <b-container>
+        <b-row>
+          <b-col cols="4"></b-col>
+          <b-col cols="4">
+            <div class="card">
+              <b-row>
+                <b-col>
+                  <b-form-group label="Factors count:" label-for="factorsInput">
+                    <b-form-input id='factorsInput' type="number" v-model="factors" required placeholder="Factors Count"></b-form-input>
+                  </b-form-group>
+                  <b-form-group label="Table:" label-for="table">
+                      <b-form-file id="table" @change="onFileChange"></b-form-file>
+                  </b-form-group>
+                  <b-button type="submit" variant="defualt">Submit</b-button>
+                </b-col>
+              </b-row>
+            </div>
+          </b-col>
+        </b-row>
+      </b-container>
+    </b-form>
   </div>
 </template>
 
@@ -16,7 +33,7 @@ export default {
   data() {
     return {
       table: '',
-      factors: 0,
+      factors: 3,
     };
   },
   methods: {
@@ -47,5 +64,17 @@ export default {
 </script>
 
 <style>
-
+  .page-title {
+    margin: 25px;
+    text-align: center;
+  }
+  .card {
+    background: #fff;
+    border-radius: 3px;
+    padding: 10px;
+    box-shadow: 0 0px 14px 0px rgba(0, 0, 0, 0.3);
+    margin: 0 auto 1.6%;
+    position: relative;
+    margin-bottom: 30px;
+  }
 </style>
