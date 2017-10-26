@@ -29,15 +29,17 @@ export default {
       reader.readAsText(file);
     },
     submitStaff() {
+      const state = this.$store.state;
       axios.post('http://localhost:5000/reduction', { table: this.table, factors: this.factors })
       .then((response) => {
-        // Write response body to main state
-        console.log(response);
-        // this.$router.push('Results');
+        state.pure = response.data.pure;
+        state.kmeans = response.data.kmeans;
+        state.mds = response.data.mds;
+        state.pca = response.data.pca;
+        state.soma = response.data.soma;
+        this.$router.push('data-before');
       })
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch(() => {});
     },
   },
 };

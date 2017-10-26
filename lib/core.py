@@ -15,6 +15,7 @@ from numpy import *
 from numpy.linalg import *
 from numpy.random import *
 from sklearn.decomposition import PCA
+import time
 
 def reduct(data, factors):
     performed = []
@@ -37,13 +38,13 @@ def reduct(data, factors):
     somaData = soma(data, factors)
     mdsData = mds(data, factors)
     
-    kmeansData = cluster_to_int(kmeansData)
-    pcaData = cluster_to_int(pcaData)
-    somaData = cluster_to_int(somaData)
-    mdsData = cluster_to_int(mdsData)
+    kmeansData['data'] = cluster_to_int(kmeansData['data'])
+    pcaData['data'] = cluster_to_int(pcaData['data'])
+    somaData['data'] = cluster_to_int(somaData['data'])
+    mdsData['data'] = cluster_to_int(mdsData['data'])
 
-    match_error = calc_errors(true_cluster_nums, kmeansData, pcaData, somaData, mdsData)
-    clust_matches = clust_size(true_cluster_nums, kmeansData, pcaData, somaData, mdsData)
+    match_error = calc_errors(true_cluster_nums, kmeansData['data'], pcaData['data'], somaData['data'], mdsData['data'])
+    clust_matches = clust_size(true_cluster_nums, kmeansData['data'], pcaData['data'], somaData['data'], mdsData['data'])
 
     pureOutput = []
     for index, row in enumerate(data):
@@ -52,32 +53,32 @@ def reduct(data, factors):
 
     return {
         'mds': {
-            'data': mdsData,
-            'speed': 0,
+            'data': mdsData['data'],
+            'speed': mdsData['time'],
             'memory': 0,
             'match_error': match_error['mds'],
             'clusters_sizes': clust_matches['sizes']['mds'],
             'clusters_sizes_error': clust_matches['sizes_error']['mds']
         },
         'pca': {
-            'data': pcaData,
-            'speed': 0,
+            'data': pcaData['data'],
+            'speed': pcaData['time'],
             'memory': 0,
             'match_error': match_error['pca'],
             'clusters_sizes': clust_matches['sizes']['pca'],
             'clusters_sizes_error': clust_matches['sizes_error']['pca']
         },
         'kmeans': {
-            'data': kmeansData,
-            'speed': 0,
+            'data': kmeansData['data'],
+            'speed': kmeansData['time'],
             'memory': 0,
             'match_error': match_error['kmeans'],
             'clusters_sizes': clust_matches['sizes']['kmeans'],
             'clusters_sizes_error': clust_matches['sizes_error']['kmeans']
         },
         'soma': {
-            'data': somaData,
-            'speed': 0,
+            'data': somaData['data'],
+            'speed': somaData['time'],
             'memory': 0,
             'match_error': match_error['soma'],
             'clusters_sizes': clust_matches['sizes']['soma'],
@@ -187,19 +188,23 @@ def cluster_to_int(array):
 def kmeans(array, fcount):
     performed_data = array
 
+    t0 = time.time()
     kmeans = KMeans(n_clusters = fcount)
     kmeans.fit(performed_data)
-
+    t1 = time.time()
+    
     centroids = kmeans.cluster_centers_
     labels = kmeans.labels_
 
     output_data = np.c_[labels, performed_data]
     output_data = output_data[np.argsort(output_data[:,0])]
 
-    return output_data.tolist()
+
+    return { 'data': output_data.tolist(), 'time': t1 - t0 }
 
 def pca(array, fcount):
     X = np.array(array)
+    t0 = time.time()
     X_std = StandardScaler().fit_transform(X)
     mean_vec = np.mean(X_std, axis=0)
     cov_mat = np.cov(X_std.T)
@@ -209,7 +214,8 @@ def pca(array, fcount):
     tot = sum(eig_vals)
     var_exp = [(i / tot)*100 for i in sorted(eig_vals, reverse=True)]
     cum_var_exp = np.cumsum(var_exp)
-
+    t1 = time.time()
+    
     arr = []
     
     for i in range(fcount):
@@ -228,21 +234,22 @@ def pca(array, fcount):
     for idx, val in enumerate(cluster_nums):
         output.append([val] + array[idx])
 
-    return output
+    return { 'data': output, 'time': t0 - t1 }
 
 def soma(array, fcount):
     array = np.array(array)
     size = len(array[0])
+    t0 = time.time()
     som = MiniSom(len(array), fcount, size, sigma=0.8, learning_rate=0.7) 
     som.random_weights_init(array)
     som.train_batch(array, 10)  
-    
+    t1 = time.time()
     results = []
 
     for val in array.tolist():
         results.append([som.winner(val)[1]] + val)
 
-    return results
+    return { 'data': results, 'time': t0 - t1 }
 
 def norm(vec):
     return sqrt(sum(vec**2))
@@ -253,14 +260,12 @@ def mds(data, dimensions):
     arrSize = len(data)
     distance = zeros((arrSize,arrSize))
 
-
-
     for (i, pointi) in enumerate(data):
         for (j, pointj) in enumerate(data):
             distance[i,j] = norm(pointi - pointj)
 
     d = distance
-
+    t0 = time.time()
     (n,n) = d.shape
     E = (-0.5 * d**2)
 
@@ -274,7 +279,7 @@ def mds(data, dimensions):
     [U, S, V] = svd(F)
 
     Y = U * sqrt(S)
-
+    t1 = time.time()
     cluster_nums = []
     for val in Y[:,0:dimensions]:
         maxVal = np.amax(val)
@@ -284,6 +289,6 @@ def mds(data, dimensions):
     for idx, val in enumerate(cluster_nums):
         output.append([val] + data[idx].tolist())
 
-    return output
+    return { 'data': output, 'time': t1 - t0 }
 
     
