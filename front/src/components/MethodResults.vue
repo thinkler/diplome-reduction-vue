@@ -2,17 +2,19 @@
   <div>
     <b-container>
       <b-row>
-        <chart-card title="Andrews Colored Data Chart" :chartRows="res.data" :andrews='true' xTitle="Pi" yTitle="Data"></chart-card>
+        <scatter-chart title="Clustered Scatter Chart" :chartRows="res.data" xTitle="some" yTitle="stuff"></scatter-chart>
+        <andrews-chart title="Andrews Colored Data Chart" :chartRows="res.data" xTitle="Pi" yTitle="Data"></andrews-chart>
       </b-row>
     </b-container>
   </div>
 </template>
 
 <script>
-import ChartCard from './ChartCard';
+import AndrewsChart from './AndrewsChart';
+import ScatterChart from './ScatterChart';
 
 export default {
-  components: { ChartCard },
+  components: { AndrewsChart, ScatterChart },
   props: ['res'],
 };
 </script>

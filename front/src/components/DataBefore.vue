@@ -36,10 +36,10 @@
               </div>
             </b-col>
           </b-row>
-          <chart-card id="data-chart" title="Raw Data Chart" :chartRows="rawData" :chartCols="pureColumns" xTitle="some" yTitle="stuff"></chart-card>
-          <chart-card id="clusterd-chart" title="Clustered Data Chart" :chartRows="coloredData" :chartCols="coloredColumns" xTitle="some" yTitle="stuff"></chart-card>
-          <chart-card id="pure-andrews-chart" title="Andrews Raw Data Chart" :chartRows="pureData.data" :andrews='true' :pure='true' xTitle="Pi" yTitle="Data"></chart-card>
-          <chart-card id="andrews-chart" title="Andrews Colored Data Chart" :chartRows="pureData.data" :andrews='true' xTitle="Pi" yTitle="Data"></chart-card>
+          <scatter-chart id="data-chart" title="Raw Data Chart" :chartRows="pureData.data" :pure='true' xTitle="some" yTitle="stuff"></scatter-chart>
+          <scatter-chart id="clusterd-chart" title="Clustered Data Chart" :chartRows="pureData.data" xTitle="some" yTitle="stuff"></scatter-chart>
+          <andrews-chart id="pure-andrews-chart" title="Andrews Raw Data Chart" :chartRows="pureData.data" :pure='true' xTitle="Pi" yTitle="Data"></andrews-chart> -->
+          <andrews-chart id="andrews-chart" title="Andrews Colored Data Chart" :chartRows="pureData.data" xTitle="Pi" yTitle="Data"></andrews-chart>
           <div id="data-table" class="card">
             <h3 class="card-title" @click="showTable = !showTable">Data Table</h3>
             <b-table v-show="showTable" hover small :items='tableData' :fields='tableFields'></b-table>
@@ -51,7 +51,8 @@
 </template>
 
 <script>
-import ChartCard from './ChartCard';
+import ScatterChart from './ScatterChart';
+import AndrewsChart from './AndrewsChart';
 
 export default {
   data() {
@@ -60,30 +61,9 @@ export default {
       showTable: true,
       tableFields: ['col1', 'col2', 'col3', 'col4'],
       pointsColors: ['red', 'green', 'blue', 'black', 'yellow', 'purple'],
-      pureColumns: [{
-        type: 'number',
-        label: 'Column 1',
-      }, {
-        type: 'number',
-        label: 'Column 2',
-      }],
-      coloredColumns: [{
-        type: 'number',
-        label: 'Column 1',
-      }, {
-        type: 'number',
-        label: 'Column 2',
-      }, {
-        type: 'string',
-        role: 'style',
-      }],
-      options: {
-        height: 500,
-        legend: 'none',
-      },
     };
   },
-  components: { ChartCard },
+  components: { ScatterChart, AndrewsChart },
   computed: {
     totalElements() {
       let sum = 0;
@@ -95,18 +75,6 @@ export default {
     totalClusters() {
       return Object.keys(this.pureData.clusters_sizes).length;
     },
-    rawData() {
-      const data = this.pureData.data;
-      return data.map(el => el.slice(1, 3));
-    },
-    coloredData() {
-      const data = this.pureData.data;
-      return data.map((el) => {
-        const row = el.slice(0);
-        row[3] = `point { fill-color: ${this.pointsColors[row[0]]}`;
-        return row.slice(1, 4);
-      });
-    },
     tableData() {
       const data = this.pureData.data.slice(0);
       return data.map((el) => {
@@ -117,9 +85,6 @@ export default {
         elementObject._rowVariant = `color-${el[0] + 1}`; // eslint-disable-line 
         return elementObject;
       });
-    },
-    classColor(index) {
-      return `span-color-${this.pointsColors[index]}`;
     },
   },
   created() {

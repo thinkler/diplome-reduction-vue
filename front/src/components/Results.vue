@@ -3,7 +3,10 @@
     <h2 class="page-title">Results</h2>
     <div>
         <b-tabs ref="tabs">
-            <b-tab v-for="(r, i) in results" :key="i" :title="r.title" active>
+            <b-tab title="Raw Data">
+              <method-results :res="rawData"></method-results>
+            </b-tab>
+            <b-tab v-for="(r, i) in results" :key="i" :title="r.title">
                 <method-stats :res="r"></method-stats>
                 <method-results :res="r"></method-results>
             </b-tab>
@@ -22,6 +25,15 @@ export default {
     return {
       results: [],
     };
+  },
+  computed: {
+    rawData() {
+      return this.$store.state.pure;
+    },
+    results() {
+      const state = this.$store.state;
+      return [state.pca, state.kmeans, state.mds, state.soma];
+    },
   },
   created() {
     const state = this.$store.state;
