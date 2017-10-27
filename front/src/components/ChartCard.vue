@@ -1,22 +1,29 @@
 <template>
-  <div class="card">
+  <div class="card"> 
     <h3 class="card-title" @click="showChart = !showChart">{{title}}</h3>
     <div class="chart" v-show="showChart">
       <vue-chart v-if="!andrews" :chart-type="'ScatterChart'" :columns="chartCols" :rows="chartRows" :options="options"></vue-chart>
-      <vue-chart v-if="andrews" :chart-type="'LineChart'" :columns="andrewsCols" :rows="andrewsRows" :options="andrewsOptions"></vue-chart>
+      <vue-chart v-if="andrews && !pure" :chart-type="'LineChart'" :columns="andrewsCols" :rows="andrewsRows" :options="coloredAndrewsOptions"></vue-chart>
+      <vue-chart v-if="andrews && pure" :chart-type="'LineChart'" :columns="andrewsCols" :rows="andrewsRows" :options="pureAndrewsOptions"></vue-chart>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['title', 'chartRows', 'chartCols', 'xTitle', 'yTitle', 'andrews'],
+  props: ['title', 'chartRows', 'chartCols', 'xTitle', 'yTitle', 'andrews', 'pure'],
   data() {
     return {
       showChart: true,
-      andrews: false,
       linesColors: ['red', 'green', 'blue', 'black', 'yellow', 'purple'],
       options: {
+        hAxis: { title: this.xTitle },
+        vAxis: { title: this.yTitle },
+        height: 500,
+        legend: { position: 'none' },
+      },
+      pureAndrewsOptions: {
+        colors: ['blue'],
         hAxis: { title: this.xTitle },
         vAxis: { title: this.yTitle },
         height: 500,
@@ -29,7 +36,7 @@ export default {
       let result = [];
       const data = this.chartRows.slice(0);
       if (this.andrews) {
-        const theta = this.linspace(-3.14, 3.14, 50);
+        const theta = this.linspace(-3.14, 3.14, 10);
         result = data.map(elem => theta.map((th) => {
           let sum = 0;
           elem.forEach((el, index) => {
@@ -55,18 +62,18 @@ export default {
     andrewsCols() {
       return this.andrewsRows[0].map(() => ({ type: 'number', label: 'data' }));
     },
-    andrewsOptions() {
+    coloredAndrewsOptions() {
       const options = {
         hAxis: { title: this.xTitle },
         vAxis: { title: this.yTitle },
         legend: { position: 'none' },
         height: 500,
+        width: 1000,
         series: {},
       };
       this.chartRows.forEach((el, i) => {
         options.series[i] = { color: this.linesColors[el[0]] };
       });
-      console.log(options.series);
       return options;
     },
   },

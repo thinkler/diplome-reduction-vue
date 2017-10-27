@@ -53,6 +53,7 @@ def reduct(data, factors):
 
     return {
         'mds': {
+            'title': 'Multidimensional Scaling',
             'data': mdsData['data'],
             'speed': mdsData['time'],
             'memory': 0,
@@ -61,6 +62,7 @@ def reduct(data, factors):
             'clusters_sizes_error': clust_matches['sizes_error']['mds']
         },
         'pca': {
+            'title': 'Principal Component Analysis',
             'data': pcaData['data'],
             'speed': pcaData['time'],
             'memory': 0,
@@ -69,6 +71,7 @@ def reduct(data, factors):
             'clusters_sizes_error': clust_matches['sizes_error']['pca']
         },
         'kmeans': {
+            'title': 'K-means',
             'data': kmeansData['data'],
             'speed': kmeansData['time'],
             'memory': 0,
@@ -77,6 +80,7 @@ def reduct(data, factors):
             'clusters_sizes_error': clust_matches['sizes_error']['kmeans']
         },
         'soma': {
+            'title': 'Self Organazing Map',
             'data': somaData['data'],
             'speed': somaData['time'],
             'memory': 0,
@@ -151,7 +155,6 @@ def clust_size(ideal, kmeans, pca, soma, mds):
     kmeans_error = {}
 
     for key in ideal_count:
-        print key
         mds_error[key] = mds_count[key] - ideal_count[key]    
         pca_error[key] = pca_count[key] - ideal_count[key]    
         soma_error[key] = soma_count[key] - ideal_count[key]    

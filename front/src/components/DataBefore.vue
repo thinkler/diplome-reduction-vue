@@ -16,6 +16,11 @@
                   <b-col cols="4"><strong>Elements Count:</strong></b-col>
                   <b-col v-for="(count, index) in pureData.clusters_sizes" :key="index"><span :style="{ color: pointsColors[index] }">{{pointsColors[index]}}</span> - {{count}}</b-col>
                 </b-row>
+                <b-row>
+                  <b-col>
+                    <router-link to="/results"><b-button class="next-button" variant='success'>Results</b-button></router-link>
+                  </b-col>
+                </b-row>
               </div>
             </b-col>
             <b-col>
@@ -24,6 +29,7 @@
                 <ul>
                   <li><a href="#data-chart">Raw Data Chart</a></li>
                   <li><a href="#clusterd-chart">Clustered Data Chart</a></li>
+                  <li><a href="#pure-andrews-chart">Andrews Raw Data Chart</a></li>
                   <li><a href="#andrews-chart">Andrews Colored Data Chart</a></li>
                   <li><a href="#data-table">Data Table</a></li>
                 </ul>
@@ -32,6 +38,7 @@
           </b-row>
           <chart-card id="data-chart" title="Raw Data Chart" :chartRows="rawData" :chartCols="pureColumns" xTitle="some" yTitle="stuff"></chart-card>
           <chart-card id="clusterd-chart" title="Clustered Data Chart" :chartRows="coloredData" :chartCols="coloredColumns" xTitle="some" yTitle="stuff"></chart-card>
+          <chart-card id="pure-andrews-chart" title="Andrews Raw Data Chart" :chartRows="pureData.data" :andrews='true' :pure='true' xTitle="Pi" yTitle="Data"></chart-card>
           <chart-card id="andrews-chart" title="Andrews Colored Data Chart" :chartRows="pureData.data" :andrews='true' xTitle="Pi" yTitle="Data"></chart-card>
           <div id="data-table" class="card">
             <h3 class="card-title" @click="showTable = !showTable">Data Table</h3>
@@ -125,10 +132,6 @@ export default {
 </script>
   
 <style>
-  .page-title {
-    margin: 25px;
-    text-align: center;
-  }
   .card-title {
     color: gray;
     text-align: center;
@@ -141,6 +144,9 @@ export default {
     text-align: center;
     font-size: 25px;
     padding-bottom: 20px !important;
+  }
+  .next-button {
+    margin-top: 20px;
   }
   tr.table-color-1 { background-color: hsla(0, 100%, 50%, 0.2) }
   tr.table-color-2 { background-color: rgba(0, 128, 0, 0.2)}
@@ -155,13 +161,4 @@ export default {
   .span-color-color-4 { color: rgba(0, 0, 0, 0.2) }
   .span-color-color-5 { color: rgba(255, 255, 0, 0.2) }
   .span-color-color-6 { color: rgba(128, 0, 128, 0.2)}
-  .card {
-    background: #fff;
-    border-radius: 3px;
-    padding: 10px;
-    box-shadow: 0 0px 14px 0px rgba(0, 0, 0, 0.3);
-    margin: 0 auto 1.6%;
-    position: relative;
-    margin-bottom: 30px;
-  }
 </style>
