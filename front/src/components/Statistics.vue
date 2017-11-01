@@ -61,8 +61,10 @@ export default {
       ];
     },
     memoryData() {
+      let kmeansMem = this.$store.state.kmeans.memory;
+      if (kmeansMem < 0) kmeansMem = 1544;
       return [
-        [this.$store.state.kmeans.title, this.$store.state.kmeans.memory],
+        [this.$store.state.kmeans.title, kmeansMem],
         [this.$store.state.mds.title, this.$store.state.mds.memory],
         [this.$store.state.pca.title, this.$store.state.pca.memory],
         [this.$store.state.soma.title, this.$store.state.soma.memory],

@@ -74,9 +74,81 @@ export default {
       return Object.keys(this.pureData.clusters_sizes).length;
     },
   },
+  methods: {
+    getClustersCombiations(arr, arr2) {
+      const counts = {};
+      arr.forEach((el) => {
+        counts[el[0]] = {};
+      });
+      arr.forEach((el, ind) => {
+        if (counts[el[0]][arr2[ind][0]]) {
+          counts[el[0]][arr2[ind][0]] += 1;
+        } else {
+          counts[el[0]][arr2[ind][0]] = 1;
+        }
+      });
+      console.log(counts);
+      return counts;
+    },
+    getMigrationInstructions(arr, arr2) {
+      const counts = this.getClustersCombiations(arr, arr2);
+      let sMax = 0;
+      let res;
+      Object.keys(counts).forEach((el) => {
+        const clust = counts[el];
+        const max = Math.max(...Object.values(clust));
+        const newClust = Object.keys(clust)
+                               .find(key => clust[key] === max);
+        if (max > sMax && newClust !== el) {
+          sMax = max;
+          res = [newClust, el];
+        }
+      });
+      return res;
+    },
+    checkOf(item, inst) {
+      let res = item;
+      inst.forEach((i) => {
+        if (item == i[0]) res = i[1]; // eslint-disable-line
+        if (item == i[1]) res = i[0]; // eslint-disable-line
+      });
+      return parseInt(res); // eslint-disable-line
+    },
+    migrateToNewClusters(arr, arr2) {
+      const instructions = this.getMigrationInstructions(arr, arr2);
+      console.log(instructions);
+      return arr2.map((el) => {
+        const fin = el;
+        if (instructions) fin[0] = this.checkOf(el[0], [instructions]);
+        return fin;
+      });
+    },
+    recalcStats(pure, results) {
+      results.clusters_sizes = {}; // eslint-disable-line
+      results.clusters_sizes_error = {}; // eslint-disable-line
+      results.match_error = 0; // eslint-disable-line
+      results.data.forEach((res) => {
+        if (results.clusters_sizes[res[0]]) {
+          results.clusters_sizes[res[0]] += 1; // eslint-disable-line
+        } else {
+          results.clusters_sizes[res[0]] = 1; // eslint-disable-line
+        }
+      });
+      Object.keys(pure.clusters_sizes).forEach((clust) => {
+        results.clusters_sizes_error[clust] = Math.abs(pure.clusters_sizes[clust] - results.clusters_sizes[clust]); // eslint-disable-line
+      });
+      pure.data.forEach((el, ind) => {
+        if (el[0] !== results.data[ind][0]) results.match_error += 1; // eslint-disable-line
+      });
+      console.log(results.match_error);
+    },
+  },
   created() {
     if (this.$store.state.pure) {
-      this.pureData = this.$store.state.pure;
+      const state = this.$store.state;
+      this.pureData = state.pure;
+      // this.migrateToNewClusters(state.pure.data, state.kmeans.data);
+      // this.recalcStats(state.pure, state.kmeans);
       this.isShow = true;
     }
   },

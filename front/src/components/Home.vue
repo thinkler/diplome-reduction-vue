@@ -60,34 +60,44 @@ export default {
         this.migrateToNewClusters(state.pure.data, state.kmeans.data);
         this.migrateToNewClusters(state.pure.data, state.mds.data);
         this.migrateToNewClusters(state.pure.data, state.soma.data);
+        this.recalcStats(state.pure, state.pca);
+        this.recalcStats(state.pure, state.kmeans);
+        this.recalcStats(state.pure, state.mds);
+        this.recalcStats(state.pure, state.soma);
         this.$router.push('data-before');
       })
       .catch(() => {});
     },
     getClustersCombiations(arr, arr2) {
-      const countsSt = {};
+      const counts = {};
       arr.forEach((el) => {
-        countsSt[el[0]] = {};
+        counts[el[0]] = {};
       });
       arr.forEach((el, ind) => {
-        if (countsSt[el[0]][arr2[ind][0]]) {
-          countsSt[el[0]][arr2[ind][0]] += 1;
+        if (counts[el[0]][arr2[ind][0]]) {
+          counts[el[0]][arr2[ind][0]] += 1;
         } else {
-          countsSt[el[0]][arr2[ind][0]] = 1;
+          counts[el[0]][arr2[ind][0]] = 1;
         }
       });
-      return countsSt;
+      console.log(counts);
+      return counts;
     },
     getMigrationInstructions(arr, arr2) {
       const counts = this.getClustersCombiations(arr, arr2);
-      console.log(counts);
-      const instructions = Object.keys(counts).map((el) => {
+      let sMax = 0;
+      let res;
+      Object.keys(counts).forEach((el) => {
         const clust = counts[el];
+        const max = Math.max(...Object.values(clust));
         const newClust = Object.keys(clust)
-                               .find(key => clust[key] === Math.max(...Object.values(clust)));
-        return [newClust, el];
+                               .find(key => clust[key] === max);
+        if (max > sMax && newClust !== el) {
+          sMax = max;
+          res = [newClust, el];
+        }
       });
-      return instructions.filter(i => i[0] !== i[1]);
+      return res;
     },
     checkOf(item, inst) {
       let res = item;
@@ -98,17 +108,37 @@ export default {
       return parseInt(res); // eslint-disable-line
     },
     migrateToNewClusters(arr, arr2) {
-      const instructions = [this.getMigrationInstructions(arr, arr2)[0]];
+      const instructions = this.getMigrationInstructions(arr, arr2);
       console.log(instructions);
       return arr2.map((el) => {
         const fin = el;
-        fin[0] = this.checkOf(el[0], instructions.slice(0, 1));
+        fin[0] = this.checkOf(el[0], [instructions]);
         return fin;
+      });
+    },
+    recalcStats(pure, results) {
+      results.clusters_sizes = {}; // eslint-disable-line
+      results.clusters_sizes_error = {}; // eslint-disable-line
+      results.match_error = 0; // eslint-disable-line
+      results.data.forEach((res) => {
+        // console.log(results.clusters_sizes[res[0]]);
+        if (results.clusters_sizes[res[0]]) {
+          results.clusters_sizes[res[0]] += 1; // eslint-disable-line
+        } else {
+          results.clusters_sizes[res[0]] = 1;// eslint-disable-line
+        }
+      });
+      Object.keys(pure.clusters_sizes).forEach((clust) => {
+        results.clusters_sizes_error[clust] = Math.abs(pure.clusters_sizes[clust] - results.clusters_sizes[clust]); // eslint-disable-line
+      });
+      pure.data.forEach((el, ind) => {
+        if (el[0] !== results.data[ind][0]) results.match_error += 1; // eslint-disable-line
       });
     },
     cutRowNames() {
       this.table = this.table.split('\n');
       const rowNames = this.table.shift().split(',');
+      console.log(rowNames);
       rowNames.shift();
       this.$store.state.rowNames = rowNames;
       this.table = this.table.join('\n');
