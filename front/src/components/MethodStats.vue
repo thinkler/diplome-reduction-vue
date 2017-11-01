@@ -10,7 +10,7 @@
           <strong>Time Spent:</strong> {{methodSpeed}}
         </b-col>
         <b-col>
-          <strong>Memory Spent:</strong> {{res.memory}}
+          <strong>Memory Spent:</strong> {{res.memory}} bytes
         </b-col>
       </b-row>
       <b-row>
@@ -35,7 +35,7 @@ export default {
   },
   computed: {
     methodSpeed() {
-      return Math.abs(this.res.speed);
+      return `${this.res.speed.toFixed(4)} ms`;
     },
   },
 };

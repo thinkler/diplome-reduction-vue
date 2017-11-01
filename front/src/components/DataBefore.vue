@@ -36,14 +36,12 @@
               </div>
             </b-col>
           </b-row>
-          <scatter-chart id="data-chart" title="Raw Data Chart" :chartRows="pureData.data" :pure='true' xTitle="some" yTitle="stuff"></scatter-chart>
-          <scatter-chart id="clusterd-chart" title="Clustered Data Chart" :chartRows="pureData.data" xTitle="some" yTitle="stuff"></scatter-chart>
-          <andrews-chart id="pure-andrews-chart" title="Andrews Raw Data Chart" :chartRows="pureData.data" :pure='true' xTitle="Pi" yTitle="Data"></andrews-chart> -->
-          <andrews-chart id="andrews-chart" title="Andrews Colored Data Chart" :chartRows="pureData.data" xTitle="Pi" yTitle="Data"></andrews-chart>
-          <div id="data-table" class="card">
-            <h3 class="card-title" @click="showTable = !showTable">Data Table</h3>
-            <b-table v-show="showTable" hover small :items='tableData' :fields='tableFields'></b-table>
-          </div>
+          <data-table title="Data Table" :data="pureData.data" :pure='true'></data-table>
+          <scatter id="data-chart" title="Raw Data Chart" :chartRows="pureData.data" :pure='true'></scatter>
+          <scatter id="clusterd-chart" title="Clustered Data Chart" :chartRows="pureData.data"></scatter>
+          <andrews-chart id="pure-andrews-chart" title="Andrews Raw Data Chart" :chartRows="pureData.data" :pure='true'></andrews-chart>
+          <andrews-chart id="andrews-chart" title="Andrews Colored Data Chart" :chartRows="pureData.data"></andrews-chart>
+          <data-table title="Colored Data Table" :data="pureData.data"></data-table>
         </b-col>
       </b-row>
     </b-container>
@@ -51,19 +49,19 @@
 </template>
 
 <script>
-import ScatterChart from './ScatterChart';
+import Scatter from './Scatter';
 import AndrewsChart from './AndrewsChart';
+import DataTable from './DataTable';
 
 export default {
   data() {
     return {
       pureData: {},
       showTable: true,
-      tableFields: ['col1', 'col2', 'col3', 'col4'],
       pointsColors: ['red', 'green', 'blue', 'black', 'yellow', 'purple'],
     };
   },
-  components: { ScatterChart, AndrewsChart },
+  components: { Scatter, AndrewsChart, DataTable },
   computed: {
     totalElements() {
       let sum = 0;
@@ -74,17 +72,6 @@ export default {
     },
     totalClusters() {
       return Object.keys(this.pureData.clusters_sizes).length;
-    },
-    tableData() {
-      const data = this.pureData.data.slice(0);
-      return data.map((el) => {
-        const elementObject = {};
-        el.forEach((e, i) => {
-          elementObject[`col${i}`] = e;
-        });
-        elementObject._rowVariant = `color-${el[0] + 1}`; // eslint-disable-line 
-        return elementObject;
-      });
     },
   },
   created() {
@@ -113,13 +100,6 @@ export default {
   .next-button {
     margin-top: 20px;
   }
-  tr.table-color-1 { background-color: hsla(0, 100%, 50%, 0.2) }
-  tr.table-color-2 { background-color: rgba(0, 128, 0, 0.2)}
-  tr.table-color-3 { background-color: rgba(0, 0, 255, 0.2) }
-  tr.table-color-4 { background-color: rgba(0, 0, 0, 0.2) }
-  tr.table-color-5 { background-color: rgba(255, 255, 0, 0.2) }
-  tr.table-color-6 { background-color: rgba(128, 0, 128, 0.2)}
-
   .span-color-color-1 { color: hsla(0, 100%, 50%, 0.2) }
   .span-color-color-2 { color: rgba(0, 128, 0, 0.2)}
   .span-color-color-3 { color: rgba(0, 0, 255, 0.2) }

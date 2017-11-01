@@ -2,6 +2,7 @@ import Home from '@/components/Home';
 import DataBefore from '@/components/DataBefore';
 import Results from '@/components/Results';
 import Comparing from '@/components/Comparing';
+import Statistics from '@/components/Statistics';
 
 export default [
   {
@@ -23,5 +24,10 @@ export default [
     path: '/comparing',
     name: 'comparing',
     component: Comparing,
+  },
+  {
+    path: '/stats',
+    name: 'stats',
+    component: Statistics,
   },
 ];

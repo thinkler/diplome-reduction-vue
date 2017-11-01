@@ -15,6 +15,7 @@ from numpy import *
 from numpy.linalg import *
 from numpy.random import *
 from sklearn.decomposition import PCA
+from guppy import hpy
 import time
 
 def reduct(data, factors):
@@ -56,7 +57,7 @@ def reduct(data, factors):
             'title': 'Multidimensional Scaling',
             'data': mdsData['data'],
             'speed': mdsData['time'],
-            'memory': 0,
+            'memory': mdsData['memory'],
             'match_error': match_error['mds'],
             'clusters_sizes': clust_matches['sizes']['mds'],
             'clusters_sizes_error': clust_matches['sizes_error']['mds']
@@ -65,7 +66,7 @@ def reduct(data, factors):
             'title': 'Principal Component Analysis',
             'data': pcaData['data'],
             'speed': pcaData['time'],
-            'memory': 0,
+            'memory': pcaData['memory'],
             'match_error': match_error['pca'],
             'clusters_sizes': clust_matches['sizes']['pca'],
             'clusters_sizes_error': clust_matches['sizes_error']['pca']
@@ -74,7 +75,7 @@ def reduct(data, factors):
             'title': 'K-means',
             'data': kmeansData['data'],
             'speed': kmeansData['time'],
-            'memory': 0,
+            'memory': kmeansData['memory'],
             'match_error': match_error['kmeans'],
             'clusters_sizes': clust_matches['sizes']['kmeans'],
             'clusters_sizes_error': clust_matches['sizes_error']['kmeans']
@@ -83,7 +84,7 @@ def reduct(data, factors):
             'title': 'Self Organazing Map',
             'data': somaData['data'],
             'speed': somaData['time'],
-            'memory': 0,
+            'memory': somaData['memory'],
             'match_error': match_error['soma'],
             'clusters_sizes': clust_matches['sizes']['soma'],
             'clusters_sizes_error': clust_matches['sizes_error']['soma']
@@ -189,25 +190,27 @@ def cluster_to_int(array):
     return new_arr
 
 def kmeans(array, fcount):
+    
     performed_data = array
 
     t0 = time.time()
+    m0 =  hpy().heap().size
     kmeans = KMeans(n_clusters = fcount)
     kmeans.fit(performed_data)
+    m1 =  hpy().heap().size
     t1 = time.time()
     
     centroids = kmeans.cluster_centers_
     labels = kmeans.labels_
 
-    output_data = np.c_[labels, performed_data]
-    output_data = output_data[np.argsort(output_data[:,0])]
+    output_data = np.c_[labels, array]
 
-
-    return { 'data': output_data.tolist(), 'time': t1 - t0 }
+    return { 'data': output_data.tolist(), 'time': t1 - t0, 'memory': m1 - m0 }
 
 def pca(array, fcount):
     X = np.array(array)
     t0 = time.time()
+    m0 =  hpy().heap().size
     X_std = StandardScaler().fit_transform(X)
     mean_vec = np.mean(X_std, axis=0)
     cov_mat = np.cov(X_std.T)
@@ -218,6 +221,7 @@ def pca(array, fcount):
     var_exp = [(i / tot)*100 for i in sorted(eig_vals, reverse=True)]
     cum_var_exp = np.cumsum(var_exp)
     t1 = time.time()
+    m1 =  hpy().heap().size
     
     arr = []
     
@@ -237,22 +241,24 @@ def pca(array, fcount):
     for idx, val in enumerate(cluster_nums):
         output.append([val] + array[idx])
 
-    return { 'data': output, 'time': t0 - t1 }
+    return { 'data': output, 'time': t1 - t0, 'memory': m1 - m0 }
 
 def soma(array, fcount):
     array = np.array(array)
     size = len(array[0])
     t0 = time.time()
+    m0 =  hpy().heap().size
     som = MiniSom(len(array), fcount, size, sigma=0.8, learning_rate=0.7) 
     som.random_weights_init(array)
     som.train_batch(array, 10)  
     t1 = time.time()
+    m1 =  hpy().heap().size
     results = []
 
     for val in array.tolist():
         results.append([som.winner(val)[1]] + val)
 
-    return { 'data': results, 'time': t0 - t1 }
+    return { 'data': results, 'time': t1 - t0, 'memory': m1 - m0 }
 
 def norm(vec):
     return sqrt(sum(vec**2))
@@ -269,6 +275,7 @@ def mds(data, dimensions):
 
     d = distance
     t0 = time.time()
+    m0 =  hpy().heap().size
     (n,n) = d.shape
     E = (-0.5 * d**2)
 
@@ -283,6 +290,7 @@ def mds(data, dimensions):
 
     Y = U * sqrt(S)
     t1 = time.time()
+    m1 =  hpy().heap().size
     cluster_nums = []
     for val in Y[:,0:dimensions]:
         maxVal = np.amax(val)
@@ -292,6 +300,6 @@ def mds(data, dimensions):
     for idx, val in enumerate(cluster_nums):
         output.append([val] + data[idx].tolist())
 
-    return { 'data': output, 'time': t1 - t0 }
+    return { 'data': output, 'time': t1 - t0, 'memory': m1 - m0 }
 
     

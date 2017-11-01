@@ -4,11 +4,13 @@
     <div>
         <b-tabs ref="tabs">
             <b-tab title="Raw Data">
-              <method-results :res="rawData"></method-results>
+              <method-results :res="rawData.data"></method-results>
+              <data-table title="Colored Data Table" :data="rawData.data"></data-table>
             </b-tab>
             <b-tab v-for="(r, i) in results" :key="i" :title="r.title">
                 <method-stats :res="r"></method-stats>
-                <method-results :res="r"></method-results>
+                <method-results :res="r.data"></method-results>
+                <data-table :title="r.title + ' Colored Table'" :data="r.data"></data-table>
             </b-tab>
         </b-tabs>
     </div>
@@ -18,14 +20,10 @@
 <script>
 import MethodResults from './MethodResults';
 import MethodStats from './MethodStats';
+import DataTable from './DataTable';
 
 export default {
-  components: { MethodResults, MethodStats },
-  data() {
-    return {
-      results: [],
-    };
-  },
+  components: { MethodResults, MethodStats, DataTable },
   computed: {
     rawData() {
       return this.$store.state.pure;
@@ -34,13 +32,6 @@ export default {
       const state = this.$store.state;
       return [state.pca, state.kmeans, state.mds, state.soma];
     },
-  },
-  created() {
-    const state = this.$store.state;
-    this.results.push(state.pca);
-    this.results.push(state.kmeans);
-    this.results.push(state.mds);
-    this.results.push(state.soma);
   },
 };
 </script>

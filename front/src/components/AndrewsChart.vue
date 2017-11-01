@@ -2,26 +2,19 @@
   <div class="card"> 
     <h3 class="card-title" @click="showChart = !showChart">{{title}}</h3>
     <div class="chart" v-show="showChart">
-      <vue-chart v-if="!pure" :chart-type="'LineChart'" :columns="andrewsCols" :rows="andrewsRows" :options="coloredAndrewsOptions"></vue-chart>
-      <vue-chart v-if="pure" :chart-type="'LineChart'" :columns="andrewsCols" :rows="andrewsRows" :options="pureAndrewsOptions"></vue-chart>
+      <line-chart v-if="!pure" :data="coloredData" :legend="false" height="500px" xtitle="Pi" ytitle="Data"></line-chart>
+      <line-chart v-if="pure" :data="pureData" :legend="false" height="500px" xtitle="Pi" ytitle="Data"></line-chart>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: ['title', 'chartRows', 'xTitle', 'yTitle', 'andrews', 'pure'],
+  props: ['title', 'chartRows', 'pure'],
   data() {
     return {
       showChart: true,
       linesColors: ['red', 'green', 'blue', 'black', 'yellow', 'purple'],
-      pureAndrewsOptions: {
-        colors: ['blue'],
-        hAxis: { title: this.xTitle },
-        vAxis: { title: this.yTitle },
-        height: 500,
-        legend: { position: 'none' },
-      },
     };
   },
   computed: {
@@ -50,22 +43,16 @@ export default {
       result = result[0].map((col, i) => result.map(row => row[i]));
       return result;
     },
-    andrewsCols() {
-      return this.andrewsRows[0].map(() => ({ type: 'number', label: 'data' }));
+    pureData() {
+      const clusters = this.chartRows;
+      const formatted = clusters.map((el, ind) => this.andrewsRows.map(e => [e[0], e[ind]]));
+      return formatted.map(data => ({ data, color: 'blue' }));
     },
-    coloredAndrewsOptions() {
-      const options = {
-        hAxis: { title: this.xTitle },
-        vAxis: { title: this.yTitle },
-        legend: { position: 'none' },
-        height: 500,
-        width: 1000,
-        series: {},
-      };
-      this.chartRows.forEach((el, i) => {
-        options.series[i] = { color: this.linesColors[el[0]] };
-      });
-      return options;
+    coloredData() {
+      const clusters = this.chartRows;
+      const formatted = clusters.map((el, ind) => this.andrewsRows.map(e => [e[0], e[ind]]));
+      return formatted.map((data, ind) =>
+        ({ data, color: this.linesColors[clusters[ind][0]] }));
     },
   },
   methods: {
