@@ -34,7 +34,7 @@ export default {
   data() {
     return {
       table: '',
-      factors: 3,
+      factors: 2,
     };
   },
   methods: {
@@ -56,9 +56,13 @@ export default {
         state.mds = response.data.mds;
         state.pca = response.data.pca;
         state.soma = response.data.soma;
+        console.log('PCA');
         this.migrateToNewClusters(state.pure.data, state.pca.data);
+        console.log('Kmeans');
         this.migrateToNewClusters(state.pure.data, state.kmeans.data);
+        console.log('MDS');
         this.migrateToNewClusters(state.pure.data, state.mds.data);
+        console.log('Soma');
         this.migrateToNewClusters(state.pure.data, state.soma.data);
         this.recalcStats(state.pure, state.pca);
         this.recalcStats(state.pure, state.kmeans);
@@ -109,12 +113,14 @@ export default {
     },
     migrateToNewClusters(arr, arr2) {
       const instructions = this.getMigrationInstructions(arr, arr2);
-      console.log(instructions);
-      return arr2.map((el) => {
-        const fin = el;
-        fin[0] = this.checkOf(el[0], [instructions]);
-        return fin;
-      });
+      if (instructions) {
+        return arr2.map((el) => {
+          const fin = el;
+          fin[0] = this.checkOf(el[0], [instructions]);
+          return fin;
+        });
+      }
+      return arr2;
     },
     recalcStats(pure, results) {
       results.clusters_sizes = {}; // eslint-disable-line
@@ -138,7 +144,6 @@ export default {
     cutRowNames() {
       this.table = this.table.split('\n');
       const rowNames = this.table.shift().split(',');
-      console.log(rowNames);
       rowNames.shift();
       this.$store.state.rowNames = rowNames;
       this.table = this.table.join('\n');

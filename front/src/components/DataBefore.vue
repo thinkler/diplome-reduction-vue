@@ -19,6 +19,7 @@
                 <b-row>
                   <b-col>
                     <router-link to="/results"><b-button class="next-button" variant='success'>Results</b-button></router-link>
+                    <router-link to="/comparing"><b-button class="next-button" variant='success'>Comparing</b-button></router-link>
                   </b-col>
                 </b-row>
               </div>
