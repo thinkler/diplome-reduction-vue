@@ -2,8 +2,14 @@
   <div class="card"> 
     <h3 class="card-title" @click="showChart = !showChart">{{title}}</h3>
     <div class="chart" v-show="showChart">
-      <scatter-chart v-if="pure" :data="pureData" :xtitle="rowNames[0]" :ytitle="rowNames[1]"></scatter-chart>
-      <scatter-chart v-if="!pure" :data="coloredData" :xtitle="rowNames[0]" :ytitle="rowNames[1]"></scatter-chart>
+      <b-row>
+        <b-col cols='4'><b-form-select v-model="changedSecondRow" :options="rows"></b-form-select></b-form-select></b-col>
+        <b-col cols='4'><b-form-select v-model="changedFirstRow" :options="rows"></b-form-select></b-col>
+        <b-btn v-on:click="applyRows">Apply</b-btn>
+      </b-row>
+      <br>
+      <scatter-chart v-if="pure" :data="pureData" :xtitle="firstRow" :ytitle="secondRow"></scatter-chart>
+      <scatter-chart v-if="!pure" :data="coloredData" :xtitle="firstRow" :ytitle="secondRow"></scatter-chart>
     </div>
   </div>
 </template>
@@ -14,7 +20,13 @@ export default {
   data() {
     return {
       showChart: true,
+      firstRow: this.$store.state.rowNames[0],
+      secondRow: this.$store.state.rowNames[1],
+      changedFirstRow: this.$store.state.rowNames[0],
+      changedSecondRow: this.$store.state.rowNames[1],
       pointsColors: ['red', 'green', 'blue', 'black', 'yellow', 'purple'],
+      chartData: null,
+      rows: this.$store.state.rowNames,
     };
   },
   computed: {
@@ -22,11 +34,32 @@ export default {
       return this.$store.state.rowNames;
     },
     pureData() {
-      return this.chartRows.map(el => el.slice(1, el.length));
+      return this.chartData || this.chartRows.map(el => el.slice(1, el.length));
     },
     coloredData() {
+      return this.chartData || this.processColors(this.chartRows);
+    },
+  },
+  methods: {
+    applyRows() {
+      this.firstRow = this.changedFirstRow;
+      this.secondRow = this.changedSecondRow;
+      const firstIndex = this.rows.indexOf(this.changedFirstRow);
+      const secondIndex = this.rows.indexOf(this.changedSecondRow);
+      const newArr = this.pure ? [firstIndex, secondIndex] : [0, firstIndex + 1, secondIndex + 1];
+
+      if (this.pure) {
+        const data = this.chartRows.map(el => el.slice(1, el.length));
+        this.chartData = data.map(el => newArr.map(it => el[it]));
+      } else {
+        const data = this.chartRows;
+        const toProcess = data.map(el => newArr.map(it => el[it]));
+        this.chartData = this.processColors(toProcess);
+      }
+    },
+    processColors(data) {
       const groups = {};
-      this.chartRows.forEach((el) => {
+      data.forEach((el) => {
         if (groups[el[0]]) {
           groups[el[0]].push(el.slice(1, el.length));
         } else {

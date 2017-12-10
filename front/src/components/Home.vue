@@ -1,29 +1,40 @@
 <template>
   <div>
-    <h2 class="page-title">Upload file, select factors</h2>
-    <b-form enctype="multipart/form-data" @submit.prevent="submitStaff">
-      <b-container>
-        <b-row>
-          <b-col cols="4">
-          </b-col>
-          <b-col cols="4">
+    <div v-show="loading" class="loading">
+      <h3 class="loading-label">Processing...</h3>
+    </div>
+    <b-container>
+      <b-row>
+        <b-col cols="6">
+          <h2 class="page-title">Method</h2>
+          <b-form enctype="multipart/form-data" @submit.prevent="submitMethod">    
             <div class="card">
-              <b-row>
-                <b-col>
-                  <b-form-group label="Factors count:" label-for="factorsInput">
-                    <b-form-input id='factorsInput' type="number" v-model="factors" required placeholder="Factors Count"></b-form-input>
-                  </b-form-group>
-                  <b-form-group label="Table:" label-for="table">
-                      <b-form-file id="table" @change="onFileChange"></b-form-file>
-                  </b-form-group>
-                  <b-button type="submit" variant="defualt">Submit</b-button>
-                </b-col>
-              </b-row>
+              <b-form-group label="Factors count:" label-for="factorsInput">
+                <b-form-select v-model="selectedMethod" :options="options"></b-form-select>
+              </b-form-group>
+              <b-form-group label="Factors count:" label-for="factorsInput">
+                <b-form-input id='factorsInput' type="number" v-model="factors" min=0 max=6 required placeholder="Factors Count"></b-form-input>
+              </b-form-group>
+              <b-form-group label="Table:" label-for="table">
+                <b-form-file id="table" @change="onFileChange"></b-form-file>
+              </b-form-group>
+              <b-button type="submit" variant="defualt">Submit</b-button>
             </div>
-          </b-col>
-        </b-row>
-      </b-container>
-    </b-form>
+          </b-form>
+        </b-col>
+        <b-col cols="6">
+          <h2 class="page-title">Experiement</h2>
+          <b-form enctype="multipart/form-data" @submit.prevent="submitExp">
+            <div class="card">
+              <b-form-group label="Table:" label-for="table">
+                <b-form-file id="table" @change="onFileChange" v-model="table"></b-form-file>
+              </b-form-group>
+              <b-button type="submit" variant="defualt">Submit</b-button>
+            </div>
+          </b-form>
+        </b-col>
+      </b-row>
+    </b-container>
   </div>
 </template>
 
@@ -35,6 +46,9 @@ export default {
     return {
       table: '',
       factors: 2,
+      options: ['mds', 'kmeans', 'pca', 'soma'],
+      selectedMethod: null,
+      loading: false,
     };
   },
   methods: {
@@ -46,23 +60,35 @@ export default {
       reader.onload = () => { vm.table = reader.result; };
       reader.readAsText(file);
     },
-    submitStaff() {
+    submitMethod() {
+      // const state = this.$store.state;
+      this.loading = true;
+      this.cutRowNames();
+      const body = {
+        table: this.table,
+        factors: this.factors,
+        method: this.selectedMethod,
+      };
+      axios.post('http://localhost:5000/method', body)
+      .then(() => {
+        console.log('Privet');
+        this.loading = false;
+      });
+    },
+    submitExp() {
       const state = this.$store.state;
       this.cutRowNames();
-      axios.post('http://localhost:5000/reduction', { table: this.table, factors: this.factors })
+      this.loading = true;
+      axios.post('http://localhost:5000/reduction', { table: this.table })
       .then((response) => {
         state.pure = response.data.pure;
         state.kmeans = response.data.kmeans;
         state.mds = response.data.mds;
         state.pca = response.data.pca;
         state.soma = response.data.soma;
-        console.log('PCA');
         this.migrateToNewClusters(state.pure.data, state.pca.data);
-        console.log('Kmeans');
         this.migrateToNewClusters(state.pure.data, state.kmeans.data);
-        console.log('MDS');
         this.migrateToNewClusters(state.pure.data, state.mds.data);
-        console.log('Soma');
         this.migrateToNewClusters(state.pure.data, state.soma.data);
         this.recalcStats(state.pure, state.pca);
         this.recalcStats(state.pure, state.kmeans);
@@ -70,8 +96,12 @@ export default {
         this.recalcStats(state.pure, state.soma);
         this.$router.push('data-before');
       })
-      .catch(() => {});
+      .catch((error) => {
+        alert(error);
+        this.loading = false;
+      });
     },
+
     getClustersCombiations(arr, arr2) {
       const counts = {};
       arr.forEach((el) => {
@@ -84,7 +114,6 @@ export default {
           counts[el[0]][arr2[ind][0]] = 1;
         }
       });
-      console.log(counts);
       return counts;
     },
     getMigrationInstructions(arr, arr2) {
@@ -127,7 +156,6 @@ export default {
       results.clusters_sizes_error = {}; // eslint-disable-line
       results.match_error = 0; // eslint-disable-line
       results.data.forEach((res) => {
-        // console.log(results.clusters_sizes[res[0]]);
         if (results.clusters_sizes[res[0]]) {
           results.clusters_sizes[res[0]] += 1; // eslint-disable-line
         } else {
@@ -154,4 +182,18 @@ export default {
 </script>
 
 <style>
+  .loading {
+    background-color: white;
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+  }
+
+  .loading-label {
+    position: absolute;
+    top: 30%;
+    left: 45%;
+  }
 </style>

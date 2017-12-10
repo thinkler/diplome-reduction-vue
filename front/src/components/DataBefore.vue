@@ -88,7 +88,7 @@ export default {
           counts[el[0]][arr2[ind][0]] = 1;
         }
       });
-      console.log(counts);
+
       return counts;
     },
     getMigrationInstructions(arr, arr2) {
@@ -117,7 +117,7 @@ export default {
     },
     migrateToNewClusters(arr, arr2) {
       const instructions = this.getMigrationInstructions(arr, arr2);
-      console.log(instructions);
+
       return arr2.map((el) => {
         const fin = el;
         if (instructions) fin[0] = this.checkOf(el[0], [instructions]);
@@ -141,7 +141,6 @@ export default {
       pure.data.forEach((el, ind) => {
         if (el[0] !== results.data[ind][0]) results.match_error += 1; // eslint-disable-line
       });
-      console.log(results.match_error);
     },
   },
   created() {
