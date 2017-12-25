@@ -21,7 +21,5 @@ def upload_data():
 def reduct_data():
     table = request.get_json()['table']
     r_method = request.get_json()['method']
-    factors = request.get_json()['factors']
-    print(table)
-    print([r_method,factors])
+    factors = int(request.get_json()['factors'])
     return jsonify(core.method(table, r_method, factors))

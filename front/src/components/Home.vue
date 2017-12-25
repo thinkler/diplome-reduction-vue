@@ -47,7 +47,7 @@ export default {
       table: '',
       factors: 2,
       options: ['mds', 'kmeans', 'pca', 'soma'],
-      selectedMethod: null,
+      selectedMethod: 'pca',
       loading: false,
     };
   },
@@ -61,7 +61,7 @@ export default {
       reader.readAsText(file);
     },
     submitMethod() {
-      // const state = this.$store.state;
+      const state = this.$store.state;
       this.loading = true;
       this.cutRowNames();
       const body = {
@@ -70,8 +70,11 @@ export default {
         method: this.selectedMethod,
       };
       axios.post('http://localhost:5000/method', body)
-      .then(() => {
-        console.log('Privet');
+      .then((response) => {
+        state.methodData = response.data;
+        state.factors = this.factors;
+        state.selectedMethod = this.selectedMethod;
+        this.$router.push('method');
         this.loading = false;
       });
     },

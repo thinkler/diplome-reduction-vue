@@ -5,5 +5,6 @@ export default {
     mds: {},
     pca: {},
     soma: {},
+    methodData: {},
   },
 };

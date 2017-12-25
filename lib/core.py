@@ -18,27 +18,28 @@ from sklearn.decomposition import PCA
 from guppy import hpy
 import time
 
-def method(table, method, factors):
-    if method == 'pca':
-        return start_pca(table, factors)
-    elif method == 'kmeans':
-        return start_kmeans(table, factors)
-    elif method == 'mds':
-        return start_mds(table, factors)
+def method(data, method, factors):
+    performed = []
+    for row in data.split('\n'):
+        n_row = []
+        for el in row.split(','):
+            if (len(el) > 0):
+                n_row.append(float(el))
+        performed.append(n_row)
+    performed.pop()
+    data = performed
+    for row in data:
+        del row[0]
+
+    if method == 'kmeans':
+        return kmeans(data, factors)
+    elif method == 'pca':
+        return pca(data, factors)
     elif method == 'soma':
-        return start_soma(table, factors)
+        return soma(data, factors)
+    elif method == 'mds':
+        return mds(data, factors)
 
-def start_pca(table, factors):
-    return '' 
-
-def start_kmeans(table, factors):
-    return ''
-
-def start_mds(table, factors):
-    return ''
-
-def start_soma(table, factors):
-    return ''
 # All below are stable
 
 def reduct(data):
@@ -58,7 +59,7 @@ def reduct(data):
         del row[0]
 
     factors = true_cluster_nums[-1] + 1
-
+    
     kmeansData = kmeans(data, factors)
     pcaData = pca(data, factors)
     somaData = soma(data, factors)
